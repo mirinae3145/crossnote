@@ -27,3 +27,5 @@ export {
 export { HeadingIdGenerator };
 export { buildWiki } from './wiki';
 export type { BuildWikiOptions, BuildWikiResult, WikiFileEntry } from './wiki';
+
+export type { SecurityPolicy } from './lib/security-policy';

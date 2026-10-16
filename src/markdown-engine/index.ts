@@ -1013,6 +1013,8 @@ window["initRevealPresentation"] = async function() {
         <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
         <meta id="crossnote-data" data-config="${escape(
           JSON.stringify({ ...this.notebook.config, ...config }),
+        )}" data-security-policy="${escape(
+          JSON.stringify(this.notebook.securityPolicy),
         )}" data-time="${Date.now()}">
         <meta charset="UTF-8">
         ${
@@ -3384,6 +3386,7 @@ sidebarTOCBtn.addEventListener('click', function(event) {
       $,
       options,
       this.resolveFilePath.bind(this),
+      this.notebook.securityPolicy.additionalLinkSchemes,
     );
 
     if (this.notebook.config.enableExtendedTableSyntax) {

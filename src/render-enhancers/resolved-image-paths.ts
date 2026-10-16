@@ -1,4 +1,5 @@
 import type { CheerioAPI } from 'cheerio';
+import { isAdditionalLinkUrl } from '../lib/security-policy';
 import { MarkdownEngineRenderOption } from '../markdown-engine';
 
 /**
@@ -57,6 +58,7 @@ export default async function enhance(
     useRelativeFilePath: boolean,
     fileDirectoryPath?: string,
   ) => string,
+  additionalLinkSchemes: readonly string[] = [],
 ): Promise<void> {
   const resolve = (src: string) =>
     resolveFilePath(
@@ -78,6 +80,14 @@ export default async function enhance(
       return;
     }
 
+    // Preserve host-approved preview links without widening resource schemes.
+    if (
+      options.isForPreview &&
+      imgElement.name === 'a' &&
+      isAdditionalLinkUrl(src, additionalLinkSchemes)
+    ) {
+      return;
+    }
     img.attr(srcTag, resolve(src));
   });
 

@@ -28,6 +28,10 @@ import useMarkdownItSourceMap from '../custom-markdown-it-features/sourcemap';
 import useMarkdownItTag from '../custom-markdown-it-features/tag';
 import useMarkdownItWidget from '../custom-markdown-it-features/widget';
 import useMarkdownItWikilink from '../custom-markdown-it-features/wikilink';
+import {
+  normalizeSecurityPolicy,
+  SecurityPolicy,
+} from '../lib/security-policy';
 import { MarkdownEngine } from '../markdown-engine';
 import { replaceVariablesInString } from '../utility';
 import { loadConfigsInDirectory, wrapNodeFSAsApi } from './config-helper';
@@ -91,6 +95,8 @@ function isSamePath(a: string, b: string): boolean {
 }
 
 interface NotebookConstructorArgs {
+  /** Host-only link policy, independent of .crossnote configuration. */
+  securityPolicy?: SecurityPolicy;
   /**
    * Absolute path to the notebook directory
    * The path can include the scheme like `file`
@@ -250,13 +256,22 @@ export class Notebook {
     typographer: boolean;
   } | null = null;
 
+  private hostSecurityPolicy: SecurityPolicy = normalizeSecurityPolicy();
+
+  /** Immutable host policy. Recreate the notebook to change it. */
+  public get securityPolicy(): SecurityPolicy {
+    return this.hostSecurityPolicy;
+  }
+
   private constructor() {}
 
   private async init({
     notebookPath,
     config = {},
+    securityPolicy,
     fs,
   }: NotebookConstructorArgs) {
+    this.hostSecurityPolicy = normalizeSecurityPolicy(securityPolicy);
     const uri = URI.parse(notebookPath);
 
     // Check if workspaceFolder is absolute path

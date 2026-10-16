@@ -9,7 +9,7 @@ import { Backlink, WebviewConfig } from '../../notebook';
 import { classifyAnchorClick } from '../lib/anchor-routing';
 import { setLocale } from '../lib/i18n';
 import { applyColorSchemeToPictures } from '../lib/picture-color-scheme';
-import { sanitizeHtml } from '../lib/sanitize';
+import { createHtmlSanitizer } from '../lib/sanitize';
 import {
   isBackgroundColorLight,
   readLocalStorage,
@@ -182,6 +182,14 @@ const PreviewContainer = createContainer(() => {
       document.getElementById('crossnote-data')?.getAttribute('data-config') ??
         '{}',
     ) as WebviewConfig;
+  }, []);
+  const sanitizeHtml = useMemo(() => {
+    const policy = JSON.parse(
+      document
+        .getElementById('crossnote-data')
+        ?.getAttribute('data-security-policy') ?? '{}',
+    );
+    return createHtmlSanitizer(policy);
   }, []);
   // Localize the webview UI before the first render reads any string.
   // The container initializer runs once per webview load, so this is a
@@ -524,7 +532,7 @@ const PreviewContainer = createContainer(() => {
 
       wavedromCache.current = newWavedromCache;
     }
-  }, []);
+  }, [sanitizeHtml]);
 
   const renderTikzjax = useCallback(async () => {
     if (!hiddenPreviewElement.current) return;
@@ -1378,6 +1386,7 @@ const PreviewContainer = createContainer(() => {
       }
     },
     [
+      sanitizeHtml,
       bindAnchorElementsClickEvent,
       bindTaskListEvent,
       bindHighlightEvent,
@@ -1702,7 +1711,12 @@ const PreviewContainer = createContainer(() => {
     } else {
       document.body.classList.remove('show-sidebar-toc');
     }
-  }, [showSidebarToc, sidebarTocHtml, bindAnchorElementsClickEvent]);
+  }, [
+    showSidebarToc,
+    sidebarTocHtml,
+    bindAnchorElementsClickEvent,
+    sanitizeHtml,
+  ]);
 
   useEffect(() => {
     // TODO: Support pagination in the future
@@ -1918,7 +1932,13 @@ const PreviewContainer = createContainer(() => {
       }
       document.head.appendChild(base);
     }
-  }, [config, initPresentationEvent, isPresentationMode, postMessage]);
+  }, [
+    config,
+    initPresentationEvent,
+    isPresentationMode,
+    postMessage,
+    sanitizeHtml,
+  ]);
 
   useEffect(() => {
     if (previewElement.current) {
@@ -2004,6 +2024,7 @@ const PreviewContainer = createContainer(() => {
   }, [notice]);
 
   return {
+    sanitizeHtml,
     backlinks,
     backlinksElement,
     bindAnchorElementsClickEvent,

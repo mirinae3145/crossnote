@@ -87,6 +87,31 @@ All notebook configuration options — types, defaults, and per-field documentat
 
 The snippet in the [Example](#example) section above shows the commonly used options (`previewTheme`, `codeBlockTheme`, `mathRenderingOption`, `printBackground`, `enableScriptExecution`, `chromePath`, ...).
 
+## Additional link schemes
+
+Embedding applications can preserve custom links in previews by supplying a host policy:
+
+```ts
+const notebook = await Notebook.init({
+  notebookPath: '/absolute/path/to/notes',
+  config: {},
+  securityPolicy: {
+    additionalLinkSchemes: ['zotero', 'obsidian'],
+  },
+});
+```
+
+The list extends HTML `<a href>` support in the preview body, outline, and backlinks; it does not extend image, iframe, form, or SVG URL permissions.
+Omitting it preserves the existing behavior.
+Names must be URI schemes without a colon, are case-insensitive, and are deduplicated.
+Invalid names and reserved schemes (`javascript`, `vbscript`, `data`, `command`, `blob`, `filesystem`, `file`) throw `TypeError`.
+
+The policy is copied and frozen at notebook creation, is separate from `NotebookConfig`, and cannot be changed through `.crossnote` configuration, frontmatter, or `updateConfig`.
+Recreate the notebook and preview to change it.
+Only populate this option from settings the embedding application trusts.
+Preserving a link does not authorize executing it: the host must validate the final URI before opening it.
+This option does not register external application handlers or change standalone export behavior.
+
 ## Notebook Local Configuration
 
 If your notebook has `.crossnote` directory, then when you run `await Notebook.init`, it will automatically create several configuration files in `.crossnote` directory and load the configurations.

@@ -7,75 +7,9 @@
  * @jest-environment jsdom
  */
 
-import katex from 'katex';
 import DOMPurify from 'dompurify';
-
-// Re-implement the sanitizer here using the same config as src/webview/lib/sanitize.ts
-// so we can test it in a real DOM environment (jsdom via @jest-environment).
-function createSanitizer() {
-  const purify = DOMPurify(window);
-
-  const SAFE_SCRIPT_TYPES = new Set(['wavedrom', 'text/tikz']);
-
-  purify.addHook(
-    'uponSanitizeElement',
-    (node: Node, data: { tagName: string }) => {
-      if (data.tagName === 'script') {
-        const el = node as Element;
-        const scriptType = (el.getAttribute?.('type') || '')
-          .toLowerCase()
-          .trim();
-        if (!SAFE_SCRIPT_TYPES.has(scriptType)) {
-          el.parentNode?.removeChild(el);
-        }
-      }
-    },
-  );
-
-  purify.addHook('afterSanitizeAttributes', (node: Element) => {
-    if (node.tagName === 'IFRAME') {
-      node.setAttribute('sandbox', '');
-      node.removeAttribute('srcdoc');
-    }
-  });
-
-  // Mirror the ALLOWED_URI_REGEXP in src/webview/lib/sanitize.ts.
-  const ALLOWED_URI_REGEXP =
-    /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|tag):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i;
-
-  return (html: string): string =>
-    purify.sanitize(html, {
-      ADD_TAGS: [
-        'iframe',
-        'style',
-        'script',
-        'semantics',
-        'annotation',
-        'annotation-xml',
-      ],
-      ADD_ATTR: [
-        'sandbox',
-        'allow',
-        'allowfullscreen',
-        'frameborder',
-        'scrolling',
-        'encoding',
-        'data-source-line',
-        'data-source-lines',
-        'data-id',
-        'data-cmd',
-        'data-code',
-        'data-processed',
-        'data-widget-name',
-        'data-widget-src',
-        'data-widget-attributes',
-        'data-background-image',
-        'data-background-iframe',
-      ],
-      ALLOW_DATA_ATTR: true,
-      ALLOWED_URI_REGEXP,
-    });
-}
+import katex from 'katex';
+import { createHtmlSanitizer as createSanitizer } from '../src/webview/lib/sanitize';
 
 /**
  * Normalize cosmetic differences that DOMPurify introduces but don't affect

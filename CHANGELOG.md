@@ -4,6 +4,10 @@ Please visit https://github.com/shd101wyy/vscode-markdown-preview-enhanced/relea
 
 ## [Unreleased]
 
+### Added
+
+- Host applications can supply `securityPolicy.additionalLinkSchemes` when creating a notebook to preserve custom links in preview content, outlines, and backlinks. The policy is isolated from document configuration and does not extend image, iframe, form, or SVG URL permissions.
+
 ## [0.9.42] - 2026-10-08
 
 ### Bug fixes

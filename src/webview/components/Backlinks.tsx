@@ -7,11 +7,11 @@ import { URI, Utils } from 'vscode-uri';
 import { Backlink } from '../../notebook';
 import PreviewContainer from '../containers/preview';
 import { t } from '../lib/i18n';
-import { sanitizeHtml } from '../lib/sanitize';
 import { BacklinksOrderDirection, BacklinksOrderRecord } from '../lib/types';
 
 export default function Backlinks() {
   const {
+    sanitizeHtml,
     backlinks: originalBacklinks,
     isLoadingBacklinks,
     backlinksElement,
